@@ -132,40 +132,40 @@ export default function App() {
   const goTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); setActiveNav(id); };
 
   const sendMessage = async () => {
-  const txt = input.trim();
-  if (!txt || aiLoading) return;
-  setInput("");
-  setMessages(m => [...m, { role: "user", text: txt }]);
-  setAiLoading(true);
-  try {
-    const hist = messages.slice(-10).map(m => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.text }]
-    }));
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            ...hist,
-            { role: "user", parts: [{ text: txt }] }
-          ],
-          systemInstruction: {
-            parts: [{ text: "You are LearnBot, a friendly AI study assistant for school and college students in India. Help them understand academic concepts clearly and concisely (under 180 words). Use simple language, real examples, and bullet points when listing steps. Encourage learning. Respond to career questions too. Stay focused on educational topics." }]
-          }
-        }),
-      }
-    );
-    const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't process that. Try rephrasing!";
-    setMessages(m => [...m, { role: "assistant", text: reply }]);
-  } catch {
-    setMessages(m => [...m, { role: "assistant", text: "Connection issue. Try again!" }]);
-  }
-  setAiLoading(false);
-};
+    const txt = input.trim();
+    if (!txt || aiLoading) return;
+    setInput("");
+    setMessages(m => [...m, { role: "user", text: txt }]);
+    setAiLoading(true);
+    try {
+      const hist = messages.slice(-10).map(m => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.text }]
+      }));
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.REACT_APP_GEMINI_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              ...hist,
+              { role: "user", parts: [{ text: txt }] }
+            ],
+            systemInstruction: {
+              parts: [{ text: "You are LearnBot, a friendly AI study assistant for school and college students in India. Help them understand academic concepts clearly and concisely. Use simple language, real examples, and bullet points. Encourage learning. Stay focused on educational topics." }]
+            }
+          }),
+        }
+      );
+      const data = await res.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Couldn't process that. Try rephrasing!";
+      setMessages(m => [...m, { role: "assistant", text: reply }]);
+    } catch (e) {
+      setMessages(m => [...m, { role: "assistant", text: "Connection issue. Try again!" }]);
+    }
+    setAiLoading(false);
+  };
 
   const pickAnswer = (i) => {
     if (quiz.sel !== null) return;
